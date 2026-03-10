@@ -41,6 +41,33 @@ wss.on('connection', (ws, req) => {
     }
   }
 
+  // Forward input from the browser to the running process's stdin
+  ws.on('message', (raw) => {
+    let msg;
+    try {
+      msg = JSON.parse(raw.toString());
+    } catch (err) {
+      console.error(`[ws] invalid JSON from client (taskId=${taskId}):`, err.message);
+      ws.send(JSON.stringify({ type: 'input_error', taskId, error: 'Invalid JSON: ' + err.message }));
+      return;
+    }
+
+    if (msg.type !== 'input') return;
+
+    const t = tasks.get(taskId);
+    if (!t?.process?.stdin?.writable) {
+      ws.send(JSON.stringify({ type: 'input_error', taskId, error: 'No running process to send input to' }));
+      return;
+    }
+
+    t.process.stdin.write(msg.text + '\n', (err) => {
+      if (err) {
+        console.error(`[ws] stdin.write failed (taskId=${taskId}):`, err.message);
+        ws.send(JSON.stringify({ type: 'input_error', taskId, error: 'Failed to write to process: ' + err.message }));
+      }
+    });
+  });
+
   ws.on('close', () => {
     if (taskSockets.get(taskId) === ws) taskSockets.delete(taskId);
   });
@@ -160,7 +187,7 @@ async function runTask(task) {
     const proc = spawn('claude', claudeArgs, {
       cwd: workDir,
       env: claudeEnv,
-      stdio: ['ignore', 'pipe', 'pipe'],
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
 
     task.process = proc;
