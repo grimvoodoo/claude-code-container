@@ -135,6 +135,42 @@ function emit(task, event) {
   }
 }
 
+// Accepts any common repo reference and returns an authenticated HTTPS clone URL.
+// Handled formats:
+//   owner/repo
+//   github.com/owner/repo
+//   https://github.com/owner/repo
+//   https://github.com/owner/repo/pull/123   (PR URLs — /pull/... is stripped)
+//   git@github.com:owner/repo.git            (SSH)
+//   github.com:owner/repo                    (SSH-style without git@)
+function buildCloneUrl(raw, token) {
+  raw = raw.trim();
+  let owner, repo;
+
+  if (raw.startsWith('git@')) {
+    // git@github.com:owner/repo.git
+    const m = raw.match(/git@[^:]+:([^/]+)\/([^/.]+)(\.git)?$/);
+    if (m) { owner = m[1]; repo = m[2]; }
+  } else if (!raw.startsWith('http') && raw.includes(':')) {
+    // github.com:owner/repo  or  github.com:owner/repo.git
+    const m = raw.match(/:([^/]+)\/([^/.]+)(\.git)?$/);
+    if (m) { owner = m[1]; repo = m[2]; }
+  } else {
+    // https://github.com/owner/repo[/pull/123][.git]  or  owner/repo
+    const path = raw
+      .replace(/^https?:\/\//, '')   // strip protocol
+      .replace(/^github\.com\//, '') // strip hostname
+      .replace(/\.git$/, '');        // strip trailing .git
+    const parts = path.split('/');
+    // Take only the first two segments — ignores /pull/123, /tree/branch, etc.
+    if (parts.length >= 2) { owner = parts[0]; repo = parts[1]; }
+  }
+
+  if (!owner || !repo) throw new Error(`Could not parse repository: "${raw}"`);
+
+  return `https://x-access-token:${token}@github.com/${owner}/${repo}.git`;
+}
+
 async function runTask(task) {
   const workDir = path.join(WORKSPACE_BASE, task.id);
 
@@ -143,23 +179,32 @@ async function runTask(task) {
     task.status = 'running';
     emit(task, { type: 'status', status: 'running' });
 
-    // Clone repo if provided
+    // Clone repo if provided — failure is non-fatal; Claude is informed and decides how to proceed
     if (task.repo) {
-      const token = process.env.GITHUB_TOKEN;
-      if (!token) throw new Error('GITHUB_TOKEN is not set; cannot clone repository');
+      let cloneError = null;
 
-      const repoUrl = task.repo.startsWith('http')
-        ? task.repo.replace('https://', `https://x-access-token:${token}@`)
-        : `https://x-access-token:${token}@github.com/${task.repo}.git`;
+      if (!process.env.GITHUB_TOKEN) {
+        cloneError = 'GITHUB_TOKEN is not set; cannot clone repository';
+      } else {
+        try {
+          const repoUrl = buildCloneUrl(task.repo, process.env.GITHUB_TOKEN);
+          emit(task, { type: 'system', text: `Cloning ${task.repo}${task.branch ? ` (${task.branch})` : ''}…\r\n` });
+          const cloneArgs = ['clone', '--depth', '1'];
+          if (task.branch) cloneArgs.push('--branch', task.branch);
+          cloneArgs.push(repoUrl, '.');
+          await spawnAsync('git', cloneArgs, workDir, task);
+          emit(task, { type: 'system', text: 'Clone complete.\r\n' });
+        } catch (err) {
+          cloneError = err.message;
+        }
+      }
 
-      emit(task, { type: 'system', text: `Cloning ${task.repo}${task.branch ? ` (${task.branch})` : ''}…\r\n` });
-
-      const cloneArgs = ['clone', '--depth', '1'];
-      if (task.branch) cloneArgs.push('--branch', task.branch);
-      cloneArgs.push(repoUrl, '.');
-
-      await spawnAsync('git', cloneArgs, workDir, task);
-      emit(task, { type: 'system', text: 'Clone complete.\r\n' });
+      if (cloneError) {
+        emit(task, { type: 'stderr', text: `Clone failed: ${cloneError}\r\n` });
+        emit(task, { type: 'system', text: 'Handing off to Claude to decide how to proceed…\r\n' });
+        // Prepend the failure so Claude has full context and can respond or ask for help
+        task.prompt = `The repository clone failed with the following error:\n${cloneError}\n\nOriginal task:\n${task.prompt}`;
+      }
     }
 
     // Configure git identity inside the workspace so Claude Code can commit
