@@ -43,15 +43,29 @@ wss.on('connection', (ws, req) => {
 
   // Forward input from the browser to the running process's stdin
   ws.on('message', (raw) => {
+    let msg;
     try {
-      const msg = JSON.parse(raw.toString());
-      if (msg.type === 'input') {
-        const t = tasks.get(taskId);
-        if (t?.process?.stdin?.writable) {
-          t.process.stdin.write(msg.text + '\n');
-        }
+      msg = JSON.parse(raw.toString());
+    } catch (err) {
+      console.error(`[ws] invalid JSON from client (taskId=${taskId}):`, err.message);
+      ws.send(JSON.stringify({ type: 'input_error', taskId, error: 'Invalid JSON: ' + err.message }));
+      return;
+    }
+
+    if (msg.type !== 'input') return;
+
+    const t = tasks.get(taskId);
+    if (!t?.process?.stdin?.writable) {
+      ws.send(JSON.stringify({ type: 'input_error', taskId, error: 'No running process to send input to' }));
+      return;
+    }
+
+    t.process.stdin.write(msg.text + '\n', (err) => {
+      if (err) {
+        console.error(`[ws] stdin.write failed (taskId=${taskId}):`, err.message);
+        ws.send(JSON.stringify({ type: 'input_error', taskId, error: 'Failed to write to process: ' + err.message }));
       }
-    } catch {}
+    });
   });
 
   ws.on('close', () => {
