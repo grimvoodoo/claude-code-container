@@ -41,7 +41,10 @@ wss.on('connection', (ws, req) => {
     }
   }
 
-  // Forward input from the browser to the running process's stdin
+  // Handle input from the browser.
+  // Because Claude Code runs in --print (non-interactive) mode, stdin is not available.
+  // Instead, we kill the current run and restart Claude in the same workspace with the
+  // new instruction, so all previously written files are still present.
   ws.on('message', (raw) => {
     let msg;
     try {
@@ -55,17 +58,26 @@ wss.on('connection', (ws, req) => {
     if (msg.type !== 'input') return;
 
     const t = tasks.get(taskId);
-    if (!t?.process?.stdin?.writable) {
-      ws.send(JSON.stringify({ type: 'input_error', taskId, error: 'No running process to send input to' }));
+    if (!t) {
+      ws.send(JSON.stringify({ type: 'input_error', taskId, error: 'Task not found' }));
+      return;
+    }
+    if (!t.workDir) {
+      ws.send(JSON.stringify({ type: 'input_error', taskId, error: 'Task workspace not ready yet' }));
       return;
     }
 
-    t.process.stdin.write(msg.text + '\n', (err) => {
-      if (err) {
-        console.error(`[ws] stdin.write failed (taskId=${taskId}):`, err.message);
-        ws.send(JSON.stringify({ type: 'input_error', taskId, error: 'Failed to write to process: ' + err.message }));
-      }
-    });
+    // Kill the running process if there is one
+    if (t.process) {
+      t.process.kill('SIGTERM');
+      t.process = null;
+    }
+
+    emit(t, { type: 'system', text: `\r\n─────────────────────────────────────────\r\nNew instruction received — restarting Claude in the same workspace…\r\n─────────────────────────────────────────\r\n` });
+
+    // Update the prompt and re-run in the existing workspace (skipping clone/git setup)
+    t.prompt = msg.text;
+    runTask(t, t.workDir);
   });
 
   ws.on('close', () => {
@@ -116,6 +128,7 @@ app.post('/api/tasks', (req, res) => {
     status: 'pending',
     events: [],
     process: null,
+    workDir: null,
     createdAt: new Date().toISOString(),
   };
   tasks.set(id, task);
@@ -171,16 +184,18 @@ function buildCloneUrl(raw, token) {
   return `https://x-access-token:${token}@github.com/${owner}/${repo}.git`;
 }
 
-async function runTask(task) {
-  const workDir = path.join(WORKSPACE_BASE, task.id);
+async function runTask(task, workDir) {
+  const isRestart = !!workDir;
+  workDir = workDir || path.join(WORKSPACE_BASE, task.id);
+  task.workDir = workDir;
 
   try {
     fs.mkdirSync(workDir, { recursive: true });
     task.status = 'running';
     emit(task, { type: 'status', status: 'running' });
 
-    // Clone repo if provided — failure is non-fatal; Claude is informed and decides how to proceed
-    if (task.repo) {
+    // Clone repo on first run only — skip on restarts triggered by user input
+    if (task.repo && !isRestart) {
       let cloneError = null;
 
       if (!process.env.GITHUB_TOKEN) {
@@ -232,7 +247,7 @@ async function runTask(task) {
     const proc = spawn('claude', claudeArgs, {
       cwd: workDir,
       env: claudeEnv,
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
 
     task.process = proc;
