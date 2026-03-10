@@ -58,6 +58,14 @@
 
     #terminal-wrap { flex: 1; overflow: hidden; padding: 6px; background: #0d1117; }
 
+    /* ── Input bar ── */
+    #input-bar { display: none; padding: 8px 10px; background: var(--surface); border-top: 1px solid var(--border); gap: 8px; align-items: center; flex-shrink: 0; }
+    #input-bar.visible { display: flex; }
+    #task-input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); padding: 7px 10px; font-size: 13px; font-family: inherit; outline: none; }
+    #task-input:focus { border-color: var(--accent); }
+    #input-send { padding: 7px 14px; background: var(--accent); border: none; color: #fff; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    #input-send:hover { background: #79b8ff; }
+
     /* ── Modal ── */
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 100; }
     .overlay.hidden { display: none; }
@@ -101,6 +109,10 @@
         <div style="font-size:12px">Create a new task or select one from the sidebar</div>
       </div>
       <div id="terminal" style="display:none; height:100%;"></div>
+    </div>
+    <div id="input-bar">
+      <input id="task-input" type="text" placeholder="Send input to the running agent…" autocomplete="off" />
+      <button id="input-send">Send</button>
     </div>
   </main>
 </div>
@@ -234,13 +246,35 @@
   }
 
   function updateToolbarStatus(status) {
+    const running = status === 'running';
+
     const btn = document.getElementById('cancel-btn');
-    btn.style.display = status === 'running' ? 'block' : 'none';
+    btn.style.display = running ? 'block' : 'none';
     btn.onclick = () => {
       if (!activeTaskId) return;
       fetch(`${API}/${activeTaskId}`, { method: 'DELETE' });
     };
+
+    const bar = document.getElementById('input-bar');
+    const input = document.getElementById('task-input');
+    running ? bar.classList.add('visible') : bar.classList.remove('visible');
+    if (running) input.focus();
   }
+
+  function sendInput() {
+    const input = document.getElementById('task-input');
+    const text = input.value;
+    if (!text || !activeWs || activeWs.readyState !== 1) return;
+    activeWs.send(JSON.stringify({ type: 'input', text }));
+    // Echo what was sent into the terminal so the user can see it
+    if (term) term.write(`\r\n> ${text}\r\n`);
+    input.value = '';
+  }
+
+  document.getElementById('input-send').addEventListener('click', sendInput);
+  document.getElementById('task-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); sendInput(); }
+  });
 
   // ── Modal ──────────────────────────────────────────────────────────────────
   document.getElementById('new-task-btn').addEventListener('click', () => {

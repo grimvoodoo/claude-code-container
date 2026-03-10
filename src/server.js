@@ -41,6 +41,19 @@ wss.on('connection', (ws, req) => {
     }
   }
 
+  // Forward input from the browser to the running process's stdin
+  ws.on('message', (raw) => {
+    try {
+      const msg = JSON.parse(raw.toString());
+      if (msg.type === 'input') {
+        const t = tasks.get(taskId);
+        if (t?.process?.stdin?.writable) {
+          t.process.stdin.write(msg.text + '\n');
+        }
+      }
+    } catch {}
+  });
+
   ws.on('close', () => {
     if (taskSockets.get(taskId) === ws) taskSockets.delete(taskId);
   });
@@ -160,7 +173,7 @@ async function runTask(task) {
     const proc = spawn('claude', claudeArgs, {
       cwd: workDir,
       env: claudeEnv,
-      stdio: ['ignore', 'pipe', 'pipe'],
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
 
     task.process = proc;
