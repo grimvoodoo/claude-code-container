@@ -1,0 +1,16 @@
+{
+  "name": "claude-code-server",
+  "version": "1.0.0",
+  "description": "Headless Claude Code server with web UI",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test tests/smoke.mjs"
+  },
+  "dependencies": {
+    "express": "^4.19.0",
+    "ws": "^8.17.0"
+  }
+}
