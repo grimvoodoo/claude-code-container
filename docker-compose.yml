@@ -1,0 +1,18 @@
+services:
+  claude-code-server:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      # Option A (subscription): leave ANTHROPIC_API_KEY unset and mount ~/.claude below
+      # Option B (API key): set ANTHROPIC_API_KEY here and remove the ~/.claude volume
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      # Mount just the credentials file — no history/cache/backups
+      - ${HOME}/.claude/.credentials.json:/home/node/.claude/.credentials.json:ro
+      - workspace:/workspace
+    restart: unless-stopped
+
+volumes:
+  workspace:

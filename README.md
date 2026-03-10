@@ -84,14 +84,18 @@ The repo ships with Kubernetes manifests in `k8s/` (maintained separately). The 
 
 ### Automated image builds
 
-Every push to `main` triggers `.github/workflows/build.yml`, which:
+Merging a pull request into `main` triggers `.github/workflows/build.yml`, which:
 
-- Builds the image with Docker Buildx
-- Pushes to `ghcr.io/<your-github-username>/claude-container` with two tags:
-  - `latest` — tracks the current `main` branch
-  - `sha-<short-sha>` — pinned tag for each commit
+1. Reads the latest git tag to determine the current version
+2. Increments the patch version (`0.0.1` → `0.0.2` → etc.), starting at `0.0.1` on the first release
+3. Creates and pushes the new git tag
+4. Builds the image with Docker Buildx and pushes to `ghcr.io/<your-github-username>/claude-container` with two tags:
+   - `0.0.1` (or whatever the new version is) — pinned, immutable tag
+   - `latest` — always points to the most recent release
 
 No repository secrets need to be configured — the workflow uses the built-in `GITHUB_TOKEN`.
+
+> Pushing directly to `main` without a PR will **not** trigger a release.
 
 ### Making the image publicly pullable
 
