@@ -1,0 +1,2 @@
+{closure@crates/frontend/src/components/terminal.rs:74:22: 74:30}
+ListenerCallback<MouseData>: SuperFrom<{closure@crates/frontend/src/components/terminal.rs:74:22: 74:30}, _>

@@ -1,0 +1,9 @@
+/home/acleveland/repo/claude-container/target/debug/deps/dioxus_core_types-ebd3c022929617f3.d: /home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/lib.rs /home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/bubbles.rs /home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/bundled.rs /home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/formatter.rs /home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/hr_context.rs
+
+/home/acleveland/repo/claude-container/target/debug/deps/libdioxus_core_types-ebd3c022929617f3.rmeta: /home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/lib.rs /home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/bubbles.rs /home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/bundled.rs /home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/formatter.rs /home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/hr_context.rs
+
+/home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/lib.rs:
+/home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/bubbles.rs:
+/home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/bundled.rs:
+/home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/formatter.rs:
+/home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/dioxus-core-types-0.7.3/src/hr_context.rs:

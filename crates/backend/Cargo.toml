@@ -1,0 +1,45 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "claude-container"
+path = "src/main.rs"
+
+[dependencies]
+shared = { path = "../shared" }
+
+# Async runtime
+tokio = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+
+# Web framework
+axum = { version = "0.7", features = ["ws", "macros"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["fs", "cors", "trace"] }
+
+# Database
+sqlx = { version = "0.8", features = [
+    "runtime-tokio",
+    "tls-native-tls",
+    "postgres",
+    "uuid",
+    "chrono",
+] }
+
+# Concurrency utilities
+dashmap = "6"
+tokio-util = "0.7"
+futures = "0.3"
+
+# Logging
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Config
+dotenvy = "0.15"

@@ -5,22 +5,76 @@ on:
   pull_request:
 
 jobs:
+  # ── Unit & integration tests (fast, no Docker) ────────────────────────────
   test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      # The frontend targets wasm32 and can't be compiled for the native test runner.
+      # It is validated separately by `dx check` and the Docker build in the smoke job.
+      - name: Run tests
+        run: cargo test --package backend --package shared
+
+      - name: Install wasm target + dx CLI
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo install dioxus-cli --locked
+
+      - name: Check frontend (WASM)
+        working-directory: crates/frontend
+        run: dx check
+
+  # ── Docker smoke test (builds the full image, hits the live API) ──────────
+  smoke:
+    runs-on: ubuntu-latest
+    needs: test
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: claude
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: claude_container
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build image
-        run: docker build -t claude-code-server:ci .
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          tags: claude-container:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Start container
         run: |
           docker run -d \
             --name claude-test \
-            -p 3000:3000 \
-            claude-code-server:ci
+            --network host \
+            -e DATABASE_URL=postgres://claude:secret@localhost:5432/claude_container \
+            -e PORT=3000 \
+            claude-container:ci
 
       - name: Wait for server to be ready
         run: |
@@ -36,16 +90,36 @@ jobs:
           docker logs claude-test
           exit 1
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: API smoke tests
+        run: |
+          # GET /api/tasks returns 200 with a JSON array
+          curl -sf http://localhost:3000/api/tasks | python3 -c "import sys,json; d=json.load(sys.stdin); assert isinstance(d, list)"
 
-      - name: Install dependencies
-        run: npm install
+          # POST without prompt returns 400
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST http://localhost:3000/api/tasks \
+            -H "Content-Type: application/json" \
+            -d '{}')
+          [ "$STATUS" = "400" ] || { echo "Expected 400, got $STATUS"; exit 1; }
 
-      - name: Run smoke tests
-        run: node --test tests/smoke.mjs
+          # POST with prompt returns 202 and a task id
+          RESP=$(curl -sf \
+            -X POST http://localhost:3000/api/tasks \
+            -H "Content-Type: application/json" \
+            -d '{"prompt":"echo hello"}')
+          echo "$RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); assert 'id' in d"
+
+          # GET /api/tasks/:id returns the created task
+          TASK_ID=$(echo "$RESP" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+          curl -sf "http://localhost:3000/api/tasks/$TASK_ID" | \
+            python3 -c "import sys,json; d=json.load(sys.stdin); assert d.get('id') == '$TASK_ID'"
+
+          # GET /api/tasks/:id with unknown id returns 404
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            http://localhost:3000/api/tasks/00000000-0000-0000-0000-000000000000)
+          [ "$STATUS" = "404" ] || { echo "Expected 404, got $STATUS"; exit 1; }
+
+          echo "All smoke tests passed."
 
       - name: Print container logs on failure
         if: failure()

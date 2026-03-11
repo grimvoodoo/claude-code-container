@@ -1,18 +1,39 @@
 services:
-  claude-code-server:
+  app:
     build: .
     ports:
       - "3000:3000"
     environment:
-      # Option A (subscription): leave ANTHROPIC_API_KEY unset and mount ~/.claude below
-      # Option B (API key): set ANTHROPIC_API_KEY here and remove the ~/.claude volume
+      - DATABASE_URL=postgres://claude:secret@db:5432/claude_container
       - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      # Option A (subscription): leave ANTHROPIC_API_KEY unset and mount ~/.claude below
+      # Option B (API key): uncomment the next line
       # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - STATIC_DIR=/app/dist
     volumes:
-      # Mount just the credentials file — no history/cache/backups
-      - ${HOME}/.claude/.credentials.json:/home/node/.claude/.credentials.json:ro
+      # Mount credentials for Claude subscription auth
+      - ${HOME}/.claude/.credentials.json:/root/.claude/.credentials.json:ro
       - workspace:/workspace
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=claude
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=claude_container
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U claude -d claude_container"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
 volumes:
   workspace:
+  postgres_data:

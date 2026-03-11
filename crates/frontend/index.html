@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Code Server</title>
+
+  <!-- xterm.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"></script>
+
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; }
+    body { background: #0d1117; }
+    #main { height: 100%; }
+  </style>
+</head>
+<body>
+  <div id="main"></div>
+
+  <!-- Terminal session manager used by Dioxus components via eval() -->
+  <script>
+    window.termApp = (function () {
+      let term = null;
+      let fitAddon = null;
+      let ws = null;
+      let onInputCallback = null;
+
+      function ensureTerminal() {
+        if (term) return;
+        term = new Terminal({
+          theme: {
+            background: '#0d1117',
+            foreground: '#e6edf3',
+            cursor: '#e6edf3',
+          },
+          fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
+          fontSize: 13,
+          lineHeight: 1.4,
+          scrollback: 10000,
+          convertEol: true,
+        });
+        fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+        const el = document.getElementById('xterm-container');
+        if (el) {
+          term.open(el);
+          fitAddon.fit();
+        }
+      }
+
+      window.addEventListener('resize', () => fitAddon && fitAddon.fit());
+
+      return {
+        /**
+         * Open a WebSocket session for the given task and display output in xterm.
+         * onStatusChange(status) is called whenever a status event arrives.
+         */
+        openSession: function (taskId, onStatusChange) {
+          // Close any existing session
+          this.closeSession();
+
+          // Re-fit terminal on next tick (container may now be visible)
+          setTimeout(() => {
+            ensureTerminal();
+            if (fitAddon) fitAddon.fit();
+            if (term) term.clear();
+          }, 50);
+
+          const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+          const wsUrl = wsProto + '//' + location.host + '/ws?taskId=' + taskId;
+          ws = new WebSocket(wsUrl);
+
+          ws.onmessage = function (ev) {
+            let msg;
+            try { msg = JSON.parse(ev.data); } catch { return; }
+
+            if (!term) ensureTerminal();
+
+            if (msg.type === 'output' || msg.type === 'stderr' || msg.type === 'system') {
+              term && term.write(msg.text);
+            }
+            if (msg.type === 'status' && typeof onStatusChange === 'function') {
+              onStatusChange(msg.status);
+            }
+          };
+
+          ws.onerror = function (e) { console.error('ws error', e); };
+        },
+
+        closeSession: function () {
+          if (ws) { ws.close(); ws = null; }
+        },
+
+        sendInput: function (text) {
+          if (ws && ws.readyState === 1) {
+            ws.send(JSON.stringify({ type: 'input', text: text }));
+            term && term.write('\r\n> ' + text + '\r\n');
+          }
+        },
+
+        write: function (text) {
+          ensureTerminal();
+          term && term.write(text);
+        },
+
+        clear: function () {
+          term && term.clear();
+        },
+
+        fit: function () {
+          fitAddon && fitAddon.fit();
+        },
+      };
+    })();
+  </script>
+</body>
+</html>

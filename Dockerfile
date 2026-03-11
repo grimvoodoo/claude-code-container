@@ -1,43 +1,71 @@
-# ── Stage 1: install Node deps ────────────────────────────────────────────────
-FROM node:20-slim AS deps
+# ── Stage 1: Build frontend (Dioxus WASM) ────────────────────────────────────
+FROM rust:1.82-slim AS frontend-builder
 
-WORKDIR /app
-COPY package.json ./
-RUN npm install --omit=dev
-
-# ── Stage 2: final image ──────────────────────────────────────────────────────
-FROM node:20-slim
-
-# System tools needed by Claude Code
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    curl \
-    ca-certificates \
+    curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Claude Code CLI globally
+# Add WASM target
+RUN rustup target add wasm32-unknown-unknown
+
+# Install Dioxus CLI
+RUN cargo install dioxus-cli --locked
+
+WORKDIR /app
+COPY Cargo.toml Cargo.lock ./
+COPY crates/shared/ ./crates/shared/
+COPY crates/frontend/ ./crates/frontend/
+
+# Build the Dioxus WASM frontend
+WORKDIR /app/crates/frontend
+RUN dx build --release
+
+# ── Stage 2: Build backend (Axum server) ─────────────────────────────────────
+FROM rust:1.82-slim AS backend-builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY Cargo.toml Cargo.lock ./
+COPY crates/shared/ ./crates/shared/
+COPY crates/backend/ ./crates/backend/
+# Dummy frontend crate so the workspace resolves
+COPY crates/frontend/Cargo.toml ./crates/frontend/Cargo.toml
+RUN mkdir -p crates/frontend/src && echo "fn main(){}" > crates/frontend/src/main.rs
+
+COPY migrations/ ./migrations/
+
+RUN cargo build --release --package backend
+
+# ── Stage 3: Final image ──────────────────────────────────────────────────────
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl ca-certificates git nodejs npm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Claude Code CLI
 RUN npm install -g @anthropic-ai/claude-code
 
-# node:20-slim already ships a 'node' user at UID 1000 — use it
-USER node
+# Copy the server binary
+COPY --from=backend-builder /app/target/release/claude-container /usr/local/bin/claude-container
+
+# Copy the compiled WASM frontend
+COPY --from=frontend-builder /app/crates/frontend/dist/ /app/dist/
 
 WORKDIR /app
 
-# Copy deps and source
-COPY --from=deps --chown=node:node /app/node_modules ./node_modules
-COPY --chown=node:node package.json ./
-COPY --chown=node:node src/ ./src/
-
-# Workspace lives on a volume
 VOLUME ["/workspace"]
 
 ENV PORT=3000
 ENV WORKSPACE_DIR=/workspace
-ENV NODE_ENV=production
+ENV STATIC_DIR=/app/dist
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD curl -fs http://localhost:3000/api/tasks || exit 1
 
-CMD ["node", "src/server.js"]
+CMD ["claude-container"]
