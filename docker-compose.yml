@@ -1,39 +1,28 @@
 services:
-  app:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      - DATABASE_URL=postgres://claude:secret@db:5432/claude_container
-      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
-      # Option A (subscription): leave ANTHROPIC_API_KEY unset and mount ~/.claude below
-      # Option B (API key): uncomment the next line
-      # - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - STATIC_DIR=/app/dist
-    volumes:
-      # Mount credentials for Claude subscription auth
-      - ${HOME}/.claude/.credentials.json:/root/.claude/.credentials.json:ro
-      - workspace:/workspace
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
-
+  # PostgreSQL — used by both local dev (cargo run) and deployed app
   db:
-    image: postgres:16-alpine
+    image: docker.io/postgres:16-alpine
+    container_name: claude-container-db
+    env_file:
+      - .env
     environment:
       - POSTGRES_USER=claude
-      - POSTGRES_PASSWORD=secret
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-changeme}
       - POSTGRES_DB=claude_container
+    ports:
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U claude -d claude_container"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 5s
+      timeout: 3s
+      retries: 10
     restart: unless-stopped
 
 volumes:
-  workspace:
-  postgres_data:
+  postgres-data:
+
+networks:
+  default:
+    name: claude-container-network

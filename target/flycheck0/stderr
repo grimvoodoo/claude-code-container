@@ -1,15 +1,450 @@
 warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
 package:   /home/acleveland/repo/claude-container/crates/frontend/Cargo.toml
 workspace: /home/acleveland/repo/claude-container/Cargo.toml
-   0.347628179s  INFO prepare_target{force=false package_id=backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend) target="claude-container"}: cargo::core::compiler::fingerprint: stale: changed "/home/acleveland/repo/claude-container/crates/backend/src/routes/ws.rs"
-   0.347648865s  INFO prepare_target{force=false package_id=backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend) target="claude-container"}: cargo::core::compiler::fingerprint:           (vs) "/home/acleveland/repo/claude-container/target/debug/.fingerprint/backend-fedaf61df6101762/dep-bin-claude-container"
-   0.347659047s  INFO prepare_target{force=false package_id=backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend) target="claude-container"}: cargo::core::compiler::fingerprint:                FileTime { seconds: 1773229225, nanos: 823736286 } < FileTime { seconds: 1773229230, nanos: 531746780 }
-   0.348047185s  INFO prepare_target{force=false package_id=backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend) target="claude-container"}: cargo::core::compiler::fingerprint: fingerprint dirty for backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend)/Check { test: false }/TargetInner { name: "claude-container", doc: true, ..: with_path("/home/acleveland/repo/claude-container/crates/backend/src/main.rs", Edition2021) }
-   0.348077169s  INFO prepare_target{force=false package_id=backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend) target="claude-container"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(StaleItem(ChangedFile { reference: "/home/acleveland/repo/claude-container/target/debug/.fingerprint/backend-fedaf61df6101762/dep-bin-claude-container", reference_mtime: FileTime { seconds: 1773229225, nanos: 823736286 }, stale: "/home/acleveland/repo/claude-container/crates/backend/src/routes/ws.rs", stale_mtime: FileTime { seconds: 1773229230, nanos: 531746780 } }))
-   0.384085210s  INFO prepare_target{force=false package_id=backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend) target="claude-container"}: cargo::core::compiler::fingerprint: stale: changed "/home/acleveland/repo/claude-container/crates/backend/src/routes/ws.rs"
-   0.384184089s  INFO prepare_target{force=false package_id=backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend) target="claude-container"}: cargo::core::compiler::fingerprint:           (vs) "/home/acleveland/repo/claude-container/target/debug/.fingerprint/backend-f37408347b5f0664/dep-test-bin-claude-container"
-   0.384202709s  INFO prepare_target{force=false package_id=backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend) target="claude-container"}: cargo::core::compiler::fingerprint:                FileTime { seconds: 1773229225, nanos: 823736286 } < FileTime { seconds: 1773229230, nanos: 531746780 }
-   0.384375674s  INFO prepare_target{force=false package_id=backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend) target="claude-container"}: cargo::core::compiler::fingerprint: fingerprint dirty for backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend)/Check { test: true }/TargetInner { name: "claude-container", doc: true, ..: with_path("/home/acleveland/repo/claude-container/crates/backend/src/main.rs", Edition2021) }
-   0.384418820s  INFO prepare_target{force=false package_id=backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend) target="claude-container"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(StaleItem(ChangedFile { reference: "/home/acleveland/repo/claude-container/target/debug/.fingerprint/backend-f37408347b5f0664/dep-test-bin-claude-container", reference_mtime: FileTime { seconds: 1773229225, nanos: 823736286 }, stale: "/home/acleveland/repo/claude-container/crates/backend/src/routes/ws.rs", stale_mtime: FileTime { seconds: 1773229230, nanos: 531746780 } }))
+    Blocking waiting for file lock on package cache
+   0.952229919s  INFO prepare_target{force=false package_id=backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend) target="claude-container"}: cargo::core::compiler::fingerprint: fingerprint error for backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend)/Check { test: false }/TargetInner { name: "claude-container", doc: true, ..: with_path("/home/acleveland/repo/claude-container/crates/backend/src/main.rs", Edition2021) }
+   0.952294070s  INFO prepare_target{force=false package_id=backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend) target="claude-container"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/acleveland/repo/claude-container/target/debug/.fingerprint/backend-577c61a7198bd3be/bin-claude-container`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/ops/function.rs:287:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  16: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  17: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  20: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  21: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:171:5
+  23: main
+  24: <unknown>
+  25: __libc_start_main
+  26: <unknown>
+   1.037958719s  INFO prepare_target{force=false package_id=shared v0.1.0 (/home/acleveland/repo/claude-container/crates/shared) target="shared"}: cargo::core::compiler::fingerprint: fingerprint error for shared v0.1.0 (/home/acleveland/repo/claude-container/crates/shared)/Check { test: false }/TargetInner { name_inferred: true, ..: lib_target("shared", ["lib"], "/home/acleveland/repo/claude-container/crates/shared/src/lib.rs", Edition2021) }
+   1.038090272s  INFO prepare_target{force=false package_id=shared v0.1.0 (/home/acleveland/repo/claude-container/crates/shared) target="shared"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/acleveland/repo/claude-container/target/debug/.fingerprint/shared-8c7a7fe41001ce8b/lib-shared`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: cargo::core::compiler::compile
+   6: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   7: cargo::ops::cargo_compile::compile_ws
+   8: cargo::ops::cargo_compile::compile_with_exec
+   9: cargo::ops::cargo_compile::compile
+  10: cargo::commands::check::exec
+  11: <cargo::cli::Exec>::exec
+  12: cargo::main
+  13: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  14: std::rt::lang_start::<()>::{closure#0}
+  15: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/ops/function.rs:287:21
+  16: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  17: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  18: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  19: std::rt::lang_start_internal::{{closure}}
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:175:24
+  20: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  21: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  22: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  23: std::rt::lang_start_internal
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:171:5
+  24: main
+  25: <unknown>
+  26: __libc_start_main
+  27: <unknown>
+   1.039538937s  INFO prepare_target{force=false package_id=uuid v1.22.0 target="uuid"}: cargo::core::compiler::fingerprint: fingerprint error for uuid v1.22.0/Check { test: false }/TargetInner { ..: lib_target("uuid", ["lib"], "/home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/uuid-1.22.0/src/lib.rs", Edition2021) }
+   1.039658425s  INFO prepare_target{force=false package_id=uuid v1.22.0 target="uuid"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/acleveland/repo/claude-container/target/debug/.fingerprint/uuid-1601c2b5faa9095b/lib-uuid`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: cargo::core::compiler::compile
+   6: cargo::core::compiler::compile
+   7: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   8: cargo::ops::cargo_compile::compile_ws
+   9: cargo::ops::cargo_compile::compile_with_exec
+  10: cargo::ops::cargo_compile::compile
+  11: cargo::commands::check::exec
+  12: <cargo::cli::Exec>::exec
+  13: cargo::main
+  14: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  15: std::rt::lang_start::<()>::{closure#0}
+  16: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/ops/function.rs:287:21
+  17: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  18: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  19: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  20: std::rt::lang_start_internal::{{closure}}
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:175:24
+  21: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  22: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  23: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  24: std::rt::lang_start_internal
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:171:5
+  25: main
+  26: <unknown>
+  27: __libc_start_main
+  28: <unknown>
+   1.041818565s  INFO prepare_target{force=false package_id=sqlx v0.8.6 target="sqlx"}: cargo::core::compiler::fingerprint: fingerprint error for sqlx v0.8.6/Check { test: false }/TargetInner { name_inferred: true, ..: lib_target("sqlx", ["lib"], "/home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.8.6/src/lib.rs", Edition2021) }
+   1.042287718s  INFO prepare_target{force=false package_id=sqlx v0.8.6 target="sqlx"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/acleveland/repo/claude-container/target/debug/.fingerprint/sqlx-53e9d53ea00c264e/lib-sqlx`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: cargo::core::compiler::compile
+   6: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   7: cargo::ops::cargo_compile::compile_ws
+   8: cargo::ops::cargo_compile::compile_with_exec
+   9: cargo::ops::cargo_compile::compile
+  10: cargo::commands::check::exec
+  11: <cargo::cli::Exec>::exec
+  12: cargo::main
+  13: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  14: std::rt::lang_start::<()>::{closure#0}
+  15: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/ops/function.rs:287:21
+  16: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  17: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  18: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  19: std::rt::lang_start_internal::{{closure}}
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:175:24
+  20: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  21: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  22: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  23: std::rt::lang_start_internal
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:171:5
+  24: main
+  25: <unknown>
+  26: __libc_start_main
+  27: <unknown>
+   1.046153290s  INFO prepare_target{force=false package_id=sqlx-core v0.8.6 target="sqlx_core"}: cargo::core::compiler::fingerprint: fingerprint error for sqlx-core v0.8.6/Check { test: false }/TargetInner { name_inferred: true, ..: lib_target("sqlx_core", ["lib"], "/home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-core-0.8.6/src/lib.rs", Edition2021) }
+   1.046236323s  INFO prepare_target{force=false package_id=sqlx-core v0.8.6 target="sqlx_core"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/acleveland/repo/claude-container/target/debug/.fingerprint/sqlx-core-75d6432a32ed5181/lib-sqlx_core`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: cargo::core::compiler::compile
+   6: cargo::core::compiler::compile
+   7: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   8: cargo::ops::cargo_compile::compile_ws
+   9: cargo::ops::cargo_compile::compile_with_exec
+  10: cargo::ops::cargo_compile::compile
+  11: cargo::commands::check::exec
+  12: <cargo::cli::Exec>::exec
+  13: cargo::main
+  14: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  15: std::rt::lang_start::<()>::{closure#0}
+  16: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/ops/function.rs:287:21
+  17: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  18: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  19: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  20: std::rt::lang_start_internal::{{closure}}
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:175:24
+  21: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  22: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  23: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  24: std::rt::lang_start_internal
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:171:5
+  25: main
+  26: <unknown>
+  27: __libc_start_main
+  28: <unknown>
+   1.084770895s  INFO prepare_target{force=false package_id=sqlx-postgres v0.8.6 target="sqlx_postgres"}: cargo::core::compiler::fingerprint: fingerprint error for sqlx-postgres v0.8.6/Check { test: false }/TargetInner { name_inferred: true, ..: lib_target("sqlx_postgres", ["lib"], "/home/acleveland/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-postgres-0.8.6/src/lib.rs", Edition2021) }
+   1.085235213s  INFO prepare_target{force=false package_id=sqlx-postgres v0.8.6 target="sqlx_postgres"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/acleveland/repo/claude-container/target/debug/.fingerprint/sqlx-postgres-0ab89ce4ef282319/lib-sqlx_postgres`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: cargo::core::compiler::compile
+   6: cargo::core::compiler::compile
+   7: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   8: cargo::ops::cargo_compile::compile_ws
+   9: cargo::ops::cargo_compile::compile_with_exec
+  10: cargo::ops::cargo_compile::compile
+  11: cargo::commands::check::exec
+  12: <cargo::cli::Exec>::exec
+  13: cargo::main
+  14: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  15: std::rt::lang_start::<()>::{closure#0}
+  16: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/ops/function.rs:287:21
+  17: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  18: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  19: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  20: std::rt::lang_start_internal::{{closure}}
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:175:24
+  21: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  22: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  23: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  24: std::rt::lang_start_internal
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:171:5
+  25: main
+  26: <unknown>
+  27: __libc_start_main
+  28: <unknown>
+   1.094594176s  INFO prepare_target{force=false package_id=backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend) target="claude-container"}: cargo::core::compiler::fingerprint: fingerprint error for backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend)/Check { test: true }/TargetInner { name: "claude-container", doc: true, ..: with_path("/home/acleveland/repo/claude-container/crates/backend/src/main.rs", Edition2021) }
+   1.095035175s  INFO prepare_target{force=false package_id=backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend) target="claude-container"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/acleveland/repo/claude-container/target/debug/.fingerprint/backend-6dbb2d83045ff7fb/test-bin-claude-container`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/ops/function.rs:287:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  16: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  17: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  20: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  21: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:171:5
+  23: main
+  24: <unknown>
+  25: __libc_start_main
+  26: <unknown>
+   1.125594098s  INFO prepare_target{force=false package_id=frontend v0.1.0 (/home/acleveland/repo/claude-container/crates/frontend) target="frontend"}: cargo::core::compiler::fingerprint: fingerprint error for frontend v0.1.0 (/home/acleveland/repo/claude-container/crates/frontend)/Check { test: false }/TargetInner { name: "frontend", doc: true, ..: with_path("/home/acleveland/repo/claude-container/crates/frontend/src/main.rs", Edition2021) }
+   1.125633650s  INFO prepare_target{force=false package_id=frontend v0.1.0 (/home/acleveland/repo/claude-container/crates/frontend) target="frontend"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/acleveland/repo/claude-container/target/debug/.fingerprint/frontend-aa2c5dc97f715642/bin-frontend`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/ops/function.rs:287:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  16: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  17: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  20: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  21: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:171:5
+  23: main
+  24: <unknown>
+  25: __libc_start_main
+  26: <unknown>
+   1.142842055s  INFO prepare_target{force=false package_id=frontend v0.1.0 (/home/acleveland/repo/claude-container/crates/frontend) target="frontend"}: cargo::core::compiler::fingerprint: fingerprint error for frontend v0.1.0 (/home/acleveland/repo/claude-container/crates/frontend)/Check { test: true }/TargetInner { name: "frontend", doc: true, ..: with_path("/home/acleveland/repo/claude-container/crates/frontend/src/main.rs", Edition2021) }
+   1.142883683s  INFO prepare_target{force=false package_id=frontend v0.1.0 (/home/acleveland/repo/claude-container/crates/frontend) target="frontend"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/acleveland/repo/claude-container/target/debug/.fingerprint/frontend-9c5021f1a7f0f3c6/test-bin-frontend`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/ops/function.rs:287:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  16: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  17: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  20: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  21: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:171:5
+  23: main
+  24: <unknown>
+  25: __libc_start_main
+  26: <unknown>
+   1.144958426s  INFO prepare_target{force=false package_id=shared v0.1.0 (/home/acleveland/repo/claude-container/crates/shared) target="shared"}: cargo::core::compiler::fingerprint: fingerprint error for shared v0.1.0 (/home/acleveland/repo/claude-container/crates/shared)/Check { test: true }/TargetInner { name_inferred: true, ..: lib_target("shared", ["lib"], "/home/acleveland/repo/claude-container/crates/shared/src/lib.rs", Edition2021) }
+   1.144993120s  INFO prepare_target{force=false package_id=shared v0.1.0 (/home/acleveland/repo/claude-container/crates/shared) target="shared"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/acleveland/repo/claude-container/target/debug/.fingerprint/shared-e69fd4a674f35bdd/test-lib-shared`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/ops/function.rs:287:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  16: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  17: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:581:40
+  20: std::panicking::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panicking.rs:544:19
+  21: std::panic::catch_unwind
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/std/src/rt.rs:171:5
+  23: main
+  24: <unknown>
+  25: __libc_start_main
+  26: <unknown>
+    Checking uuid v1.22.0
+    Checking shared v0.1.0 (/home/acleveland/repo/claude-container/crates/shared)
+    Checking sqlx-core v0.8.6
+    Checking frontend v0.1.0 (/home/acleveland/repo/claude-container/crates/frontend)
+    Checking sqlx-postgres v0.8.6
+    Checking sqlx v0.8.6
     Checking backend v0.1.0 (/home/acleveland/repo/claude-container/crates/backend)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.86s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 17.18s

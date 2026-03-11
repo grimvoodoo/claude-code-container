@@ -1,5 +1,5 @@
 # ── Stage 1: Build frontend (Dioxus WASM) ────────────────────────────────────
-FROM rust:1.82-slim AS frontend-builder
+FROM docker.io/rust:1.82-slim AS frontend-builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl ca-certificates \
@@ -21,7 +21,7 @@ WORKDIR /app/crates/frontend
 RUN dx build --release
 
 # ── Stage 2: Build backend (Axum server) ─────────────────────────────────────
-FROM rust:1.82-slim AS backend-builder
+FROM docker.io/rust:1.82-slim AS backend-builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config libssl-dev \
@@ -40,7 +40,7 @@ COPY migrations/ ./migrations/
 RUN cargo build --release --package backend
 
 # ── Stage 3: Final image ──────────────────────────────────────────────────────
-FROM debian:bookworm-slim
+FROM docker.io/debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl ca-certificates git nodejs npm \

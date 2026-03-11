@@ -1,0 +1,24 @@
+services:
+  app:
+    build: .
+    container_name: claude-container-app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      # Override DATABASE_URL so the app reaches the db service by its compose hostname
+      - DATABASE_URL=postgres://claude:${DB_PASSWORD:-changeme}@db:5432/claude_container
+      - STATIC_DIR=/app/dist
+    volumes:
+      # Mount Claude credentials for subscription auth.
+      # If you use ANTHROPIC_API_KEY instead, this mount is not required.
+      - ${HOME}/.claude/.credentials.json:/root/.claude/.credentials.json:ro
+      - workspace:/workspace
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  workspace:

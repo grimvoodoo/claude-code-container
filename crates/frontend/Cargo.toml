@@ -10,7 +10,7 @@ dioxus = { version = "0.7", features = ["web"] }
 
 serde = { workspace = true }
 serde_json = { workspace = true }
-uuid = { workspace = true }
+uuid = { workspace = true, features = ["js"] }
 chrono = { workspace = true }
 
 # HTTP client for WASM
